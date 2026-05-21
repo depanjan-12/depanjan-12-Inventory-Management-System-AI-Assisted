@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Product - Inventory Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .search-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            margin-top: 2rem;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .product-table th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .product-table td {
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .product-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .alert {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .search-section {
+                flex-direction: column;
+            }
+
+            .product-table {
+                font-size: 0.9rem;
+            }
+
+            .product-table th,
+            .product-table td {
+                padding: 0.5rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                font-size: 0.8rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Inventory Management System</h1>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Search Product</h2>
+            
+            <div id="alertContainer"></div>
+            
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="Enter Product Name" value="">
+                <button class="btn btn-primary" onclick="searchProducts()">Search</button>
+                <button class="btn btn-primary" onclick="loadAllProducts()">Show All</button>
+                <a href="/dashboard" class="btn btn-secondary">Back</a>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Product</h3>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editProductId">
+                <div class="form-group">
+                    <label for="editProductName">Product Name:</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editQuantity">Quantity:</label>
+                    <input type="number" id="editQuantity" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPrice">Price (₹):</label>
+                    <input type="number" id="editPrice" step="0.01" min="0" required>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/api/auth/check');
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                loadAllProducts();
+            } catch (error) {
+                window.location.href = '/';
+            }
+        });
+
+        const alertContainer = document.getElementById('alertContainer');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const searchInput = document.getElementById('searchInput');
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+
+        // Search on Enter key
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchProducts();
+            }
+        });
+
+        async function searchProducts() {
+            const searchTerm = searchInput.value.trim();
+            
+            if (!searchTerm) {
+                showAlert('Please enter a product name to search', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/products/search/${encodeURIComponent(searchTerm)}`);
+                if (response.ok) {
+                    const products = await response.json();
+                    displayResults(products, `Search results for "${searchTerm}"`);
+                } else {
+                    showAlert('Error searching products', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+            }
+        }
+
+        async function loadAllProducts() {
+            try {
+                const response = await fetch('/api/products');
+                if (response.ok) {
+                    const products = await response.json();
+                    displayResults(products, 'All Products');
+                } else {
+                    showAlert('Error loading products', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+            }
+        }
+
+        function displayResults(products, title) {
+            if (products.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="no-results">No products found</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <div class="card">
+                    <h3>${title} (${products.length} items)</h3>
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Price (₹)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${products.map(product => `
+                                <tr>
+                                    <td>${product.id}</td>
+                                    <td>${product.name}</td>
+                                    <td>${product.quantity}</td>
+                                    <td>₹${product.price.toFixed(2)}</td>
+                                    <td>
+                                        <div class="actions">
+                                            <button class="btn btn-warning" onclick="editProduct(${product.id}, '${product.name}', ${product.quantity}, ${product.price})">Edit</button>
+                                            <button class="btn btn-danger" onclick="deleteProduct(${product.id}, '${product.name}')">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            resultsContainer.innerHTML = tableHTML;
+        }
+
+        function editProduct(id, name, quantity, price) {
+            document.getElementById('editProductId').value = id;
+            document.getElementById('editProductName').value = name;
+            document.getElementById('editQuantity').value = quantity;
+            document.getElementById('editPrice').value = price;
+            editModal.style.display = 'block';
+        }
+
+        function closeEditModal() {
+            editModal.style.display = 'none';
+        }
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('editProductId').value;
+            const data = {
+                name: document.getElementById('editProductName').value,
+                quantity: parseInt(document.getElementById('editQuantity').value),
+                price: parseFloat(document.getElementById('editPrice').value)
+            };
+            
+            try {
+                const response = await fetch(`/api/products/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    showAlert('Product updated successfully!', 'success');
+                    closeEditModal();
+                    loadAllProducts();
+                } else {
+                    const result = await response.json();
+                    showAlert(result.error || 'Failed to update product', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+            }
+        });
+
+        async function deleteProduct(id, name) {
+            if (!confirm(`Are you sure you want to delete "${name}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/products/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showAlert('Product deleted successfully!', 'success');
+                    loadAllProducts();
+                } else {
+                    const result = await response.json();
+                    showAlert(result.error || 'Failed to delete product', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            clearAlerts();
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(clearAlerts, 5000);
+        }
+
+        function clearAlerts() {
+            alertContainer.innerHTML = '';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === editModal) {
+                closeEditModal();
+            }
+        }
+    </script>
+</body>
+</html>
